@@ -6,7 +6,8 @@ import Signup from './components/Signup';
 import NavbarLogin from './components/NavbarLogin';
 import ViewArticle from './components/ViewArticle';
 import { initializeApp } from "firebase/app";
-import { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged , signOut } from "firebase/auth";
+import { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged , signOut, getRedirectResult } from "firebase/auth";
+import Switchcomponent from './components/SwitchComponent';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCfD8POjQvxVY4kL5r-UyJFgdBiBUp6yZI",
@@ -20,9 +21,6 @@ const firebaseConfig = {
 const fire = initializeApp(firebaseConfig);
 const auth = getAuth()
 
-
-
-
 function App() {
   
   const [user, setUser] = useState("");
@@ -30,9 +28,7 @@ function App() {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [hasAccount, setHasAccount] = useState(false);
   
-
   const clearInputs = () =>{
     setEmail('')
     setPassword('')
@@ -44,9 +40,11 @@ function App() {
   }
   const handleLogin = () =>{
     clearErrors()
-    signInWithEmailAndPassword(auth,email,password).catch((err)=>{
+    signInWithEmailAndPassword(auth,email,password).then((userCredentials)=>{
+      console.log(auth.currentUser.email)
+      console.log(userCredentials.user,"in login")
+    }).catch((err)=>{
       switch(err.code){
-        
         case "auth/user-not-found": 
           setEmailError(err.message)
           break;
@@ -61,7 +59,10 @@ function App() {
 
   const handleSignup = () =>{
     clearErrors()
-    createUserWithEmailAndPassword(auth,email,password).catch((err)=>{
+    createUserWithEmailAndPassword(auth,email,password).then((userCredentials)=>{
+      console.log(auth.currentUser.email)
+      console.log(userCredentials.user,"in signup")
+    }).catch((err)=>{
       switch(err.code){
         case "auth/invalid-email":
           setEmailError(err.message)
@@ -75,50 +76,60 @@ function App() {
   }
   
   const handleLogout = () =>{
+    console.log("in logout function")
     
-    signOut(auth,(user)=>{
-        setUser("")
-        console.log("user logout success")
-    })
-  }
+  signOut(auth).then(()=>{
+    console.log("success signout")
+
+    setUser("")
+    
+  }).catch((err)=>{
+    console.log("error in signout")
+  })
+
+}
   
   const authListener = () =>{
     onAuthStateChanged(auth,(user_acc)=>{
       if(user_acc){
         clearInputs()
-        console.log("in user_acc")
+        console.log(auth.currentUser.email)
+        console.log("auth listener success, login / signup")
         setUser(user_acc)
+   
+      
       }else{
+      
         setUser("")
-        console.log("in auth listener")
+        console.log("auth listener failure")
       }
     })
   }
 
   useEffect(() => {
     authListener();
-    console.log("in auth state changed")
+    console.log("in use effect of app.js")
+
+    return () =>{
+      
+    }
   }, []);
 
   
 
   return (
     <>
-      {/* <Navbar /> */}
-      {/* <Signup /> */}
       {user ? (
         <>
-        <NavbarLogin handleLogout = {handleLogout} />
+        <NavbarLogin handleLogout = {handleLogout}  />
         <ViewArticle />
         </>
       ):(
         <>
-        <Login email={email} password={password} setEmail={setEmail} setPassword={setPassword} hasAccount={hasAccount} setHasAccount={setHasAccount} emailError={emailError} passwordError={passwordError} handleLogin={handleLogin} handleSignup={handleSignup}  />
-        <Signup email={email} password={password} setEmail={setEmail} setPassword={setPassword} hasAccount={hasAccount} setHasAccount={setHasAccount} emailError={emailError} passwordError={passwordError} handleLogin={handleLogin} handleSignup={handleSignup}  />
+        <Navbar />
+        <Switchcomponent email={email} password={password} setEmail={setEmail} setPassword={setPassword}  emailError={emailError} passwordError={passwordError} handleLogin={handleLogin} handleSignup={handleSignup} handleLogout = {handleLogout} />
         </>
       )}
-      
-      {/* <ViewArticle /> */}
     </>
   );
 }

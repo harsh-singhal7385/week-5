@@ -1,17 +1,9 @@
 import React , { useState, useEffect } from 'react';
 import axios from 'axios'
 
-// https://dev.to/shareef/how-to-work-with-arrays-in-reactjs-usestate-4cmi
-
-// https://stackoverflow.com/questions/65633364/how-to-use-usestate-hook-to-map-json-response-from-api/65633458
-
-// https://dev.to/joelynn/react-hooks-working-with-state-arrays-2n2g
-
 const ViewArticle = () => {
     
     const [mydata,setMydata] = useState([])
-    
-    // console.log(mydata)
     
     useEffect(() => {
         axios.get('https://jsonplaceholder.typicode.com/todos/').then((data)=>{
@@ -20,6 +12,7 @@ const ViewArticle = () => {
         .then((data)=>{
             const transformData = data.map((user)=>{
                 return {
+                    "userId" : user.userId,
                     "id" : user.id,
                     "title" : user.title,
                     "completed" : user.completed
@@ -27,60 +20,52 @@ const ViewArticle = () => {
             })
             
             setMydata( prevState => ([...transformData]) )
-            // setMydata(([...transformData])  )
-            
             console.log("indside handlechange") 
         
         }).catch((err)=>{
             console.log(err)
         })
+        return () => {
+            setMydata([])
+          }
+
       },[]);
     
-      function handleChange(){
-            axios.get('https://jsonplaceholder.typicode.com/todos/').then((data)=>{
-                return data.data
-            })
-            .then((data)=>{
-                const transformData = data.map((user)=>{
-                    return {
-                        "id" : user.id,
-                        "title" : user.title,
-                        "completed" : user.completed
-                    }
-                })
-                
-                setMydata( prevState => ([...transformData]) )
-                // setMydata(([...transformData])  )
-                
-                console.log("indside handlechange") 
-            
-            }).catch((err)=>{
-                console.log(err)
-            })
-      }
     return (
         <>
+        <div className='display-4 bg-danger p-5 text-center'>
+            Displaying data from API call...
             <br />
-            {/* {
-                mydata.map((user) => {
-                <div key={user.id}>
-                    <p>{user.title}</p>
-                    <p>{user.completed}</p>
-                </div>
-                })
-            }  */}
-            {
-                mydata.map((user) => {
-               return( <div key={user.id}>
-                    <p>{user.title}</p>
-                    <p>{user.completed}</p>
-                        </div>
-               )}
-                )}
-            
-            <br />
-            <button type='button' onClick={handleChange}>My Button</button>
-        
+        </div>
+        <div className='p-3 text-center  bg-info'>
+            <a href="https://jsonplaceholder.typicode.com/todos/" className="text-dark" target="_blank">https://jsonplaceholder.typicode.com/todos/</a>
+        </div>
+        <div className='container bg-warning p-3'>
+            <table className="table table-hover">
+                <thead>
+                    <tr className='p-5'>
+                        <th scope="col" className='p-3 text-center'>USERID</th>
+                        <th scope="col" className='p-3 text-center'>ID</th>
+                        <th scope="col" className='p-3 text-center'>Title</th>
+                        <th scope="col" className='p-3 text-center'>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {
+                    mydata.map((user) => {
+                        return (
+                        <tr className='p-5'>
+                            <td className='p-3 text-center' scope="row">{user.userId}</td>
+                            <td className='p-3 text-center' scope="row">{user.id}</td>
+                            <td className='p-3 text-center'>{user.title}</td>
+                            <td className='p-3 text-center' >{String(user.completed)}</td>
+                        </tr> 
+                        )
+                    })
+                }
+                </tbody>
+            </table>
+        </div>
         </>
     );
 }
