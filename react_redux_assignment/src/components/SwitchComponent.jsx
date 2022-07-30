@@ -23,7 +23,7 @@ const Switchcomponent = (props) => {
         <>
             <div className='container bg-info p-5 mt-5  text-center'>
                 <div className='display-4 text-center bg-dark text-light p-5 mb-5'>
-                    Welcome to Quantiphi...
+                    Welcome ...
                 </div>
                 <div className='row'>
                 <div className='col bg-danger p-5'>
